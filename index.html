@@ -920,47 +920,70 @@ const AREAS = {
     total:    5,
     word:     'さとらんど',
     veggies: [
-      { id:'pumpkin',     name:'かぼちゃ',       icon:'🎃', kana:'さ' },
-      { id:'bbq',         name:'BBQ串',           icon:'🍢', kana:'と' },
-      { id:'fries',       name:'フライドポテト',  icon:'🍟', kana:'ら' },
-      { id:'corn',        name:'とうきび',        icon:'🌽', kana:'ん' },
-      { id:'watermelon',  name:'すいか',          icon:'🍉', kana:'ど' },
+      { id:'turnip',   name:'かぶ',           icon:'🫜', kana:'さ' },
+      { id:'carrot',   name:'にんじん',       icon:'🥕', kana:'と' },
+      { id:'onion',    name:'たまねぎ',       icon:'🧅', kana:'ら' },
+      { id:'melon',    name:'カットメロン',   icon:'🍈', kana:'ん' },
+      { id:'lotus',    name:'れんこん',       icon:'🥔', kana:'ど' },
     ],
-    storageKey:      'satoland_north_v1',
-    completeShownKey:'satoland_north_complete',
+    storageKey:      'satoland_north_v2',
+    completeShownKey:'satoland_north_complete_v2',
   },
   south: {
     label:    '南エリア（交流館側）',
     total:    7,
     word:     'スプリングフェア',
     veggies: [
-      { id:'turnip',   name:'かぶ',           icon:'🫜', kana:'ス' },
-      { id:'carrot',   name:'にんじん',       icon:'🥕', kana:'プ' },
-      { id:'onion',    name:'たまねぎ',       icon:'🧅', kana:'リ' },
-      { id:'melon',    name:'カットメロン',   icon:'🍈', kana:'ン' },
-      { id:'lotus',    name:'れんこん',       icon:'🥔', kana:'グ' },
-      { id:'pepper',   name:'ピーマン',       icon:'🫑', kana:'フェ'},
-      { id:'mandrake', name:'マンドラゴラ',   icon:'🪵', kana:'ア' },
+      { id:'pumpkin',     name:'かぼちゃ',       icon:'🎃', kana:'ス' },
+      { id:'bbq',         name:'BBQ串',           icon:'🍢', kana:'プ' },
+      { id:'fries',       name:'フライドポテト',  icon:'🍟', kana:'リ' },
+      { id:'corn',        name:'とうきび',        icon:'🌽', kana:'ン' },
+      { id:'watermelon',  name:'すいか',          icon:'🍉', kana:'グ' },
+      { id:'pepper',      name:'ピーマン',        icon:'🫑', kana:'フェ'},
+      { id:'mandrake',    name:'マンドラゴラ',    icon:'🪵', kana:'ア' },
     ],
-    storageKey:      'satoland_south_v1',
-    completeShownKey:'satoland_south_complete',
+    storageKey:      'satoland_south_v2',
+    completeShownKey:'satoland_south_complete_v2',
   },
 };
 
 // ============================================================
 // 管理者送信設定
 // ============================================================
-const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbx5vC8akoGjHymeh-UV_LtOMmuvOS3prQTWJT2in-y6vV1oe7PHWkhzG9XHiUcFsQqM/exec'; // ← GASをデプロイ後、このURLを差し替えてください
+
+// Apps ScriptをWebアプリとしてデプロイしたあと、発行された /exec URL をここに入れる
+const GAS_ENDPOINT = https://script.google.com/a/macros/elms.hokudai.ac.jp/s/AKfycbx4wiv9NUyvcflkxw8rKcX1Z6NT8Ea2aE9vB1o78_gR9cYBTkiIJLeJjXdA1LPaBPq1/exec;
 
 function sendToGAS(area, benchName, kana, time, photo) {
-  if (!GAS_ENDPOINT || GAS_ENDPOINT.indexOf('script.google.com') === -1) return;
+  if (!GAS_ENDPOINT || GAS_ENDPOINT.indexOf('script.google.com') === -1) {
+    console.warn('GAS_ENDPOINTが未設定です。');
+    return;
+  }
+
+  const areaData = AREAS[area] || {};
+
+  const payload = {
+    areaKey: area,
+    areaLabel: areaData.label || area,
+    benchName: benchName,
+    kana: kana,
+    time: time,
+    photo: photo,
+    userAgent: navigator.userAgent
+  };
+
   try {
     fetch(GAS_ENDPOINT, {
-      method: 'POST', mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ area, benchName, kana, time, photo }),
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+      body: JSON.stringify(payload)
     });
-  } catch(e) { console.warn('送信エラー:', e); }
+  } catch(e) {
+    console.warn('送信エラー:', e);
+  }
 }
 
 // ============================================================
